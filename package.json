@@ -11,20 +11,20 @@
     "src",
     "lib",
     "android",
-    "ios",
-    "react-native-serialport.podspec",
+    "@types",
+    "plugin/build",
     "!**/__tests__",
     "!**/__fixtures__",
     "!**/__mocks__",
     "!android/build",
     "!android/.gradle",
-    "!android/.idea",
-    "!ios/build"
+    "!android/.idea"
   ],
   "scripts": {
     "typescript": "tsc --noEmit",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "prepare": "bob build",
+    "build:plugin": "tsc --project plugin/tsconfig.json",
+    "prepare": "bob build && npm run build:plugin",
     "release": "release-it",
     "example": "yarn --cwd example",
     "bootstrap": "yarn example && yarn && yarn example pods"
