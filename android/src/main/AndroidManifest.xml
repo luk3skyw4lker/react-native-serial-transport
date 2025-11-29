@@ -1,0 +1,3 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Empty manifest - permissions are declared by the consumer app -->
+</manifest>

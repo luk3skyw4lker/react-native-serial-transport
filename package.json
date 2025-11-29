@@ -1,41 +1,79 @@
 {
-  "name": "SerialNativeModule",
-  "version": "0.0.1",
-  "private": true,
+  "name": "react-native-serial-transport",
+  "version": "0.1.0",
+  "description": "USB Serial Port support for React Native for Android",
+  "main": "lib/commonjs/index.js",
+  "module": "lib/module/index.js",
+  "types": "lib/typescript/src/index.d.ts",
+  "react-native": "src/index.ts",
+  "source": "src/index.ts",
+  "files": [
+    "src",
+    "lib",
+    "android",
+    "ios",
+    "react-native-serialport.podspec",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!android/build",
+    "!android/.gradle",
+    "!android/.idea",
+    "!ios/build"
+  ],
   "scripts": {
-    "android": "react-native run-android",
-    "ios": "react-native run-ios",
-    "lint": "eslint .",
-    "start": "react-native start",
-    "test": "jest"
+    "typescript": "tsc --noEmit",
+    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "prepare": "bob build",
+    "release": "release-it",
+    "example": "yarn --cwd example",
+    "bootstrap": "yarn example && yarn && yarn example pods"
   },
-  "dependencies": {
-    "react": "19.1.1",
-    "react-native": "0.82.1",
-    "@react-native/new-app-screen": "0.82.1",
-    "react-native-safe-area-context": "^5.5.2"
+  "keywords": [
+    "react-native",
+    "android",
+    "serial",
+    "usb",
+    "esp32",
+    "esp8266",
+    "esptool",
+    "flash",
+    "uart"
+  ],
+  "repository": "https://github.com/yourorg/react-native-serialport",
+  "author": "Your Name <your@email.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourorg/react-native-serialport/issues"
+  },
+  "homepage": "https://github.com/yourorg/react-native-serialport#readme",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.2",
-    "@babel/preset-env": "^7.25.3",
-    "@babel/runtime": "^7.25.0",
-    "@react-native-community/cli": "20.0.0",
-    "@react-native-community/cli-platform-android": "20.0.0",
-    "@react-native-community/cli-platform-ios": "20.0.0",
-    "@react-native/babel-preset": "0.82.1",
-    "@react-native/eslint-config": "0.82.1",
-    "@react-native/metro-config": "0.82.1",
-    "@react-native/typescript-config": "0.82.1",
-    "@types/jest": "^29.5.13",
-    "@types/react": "^19.1.1",
-    "@types/react-test-renderer": "^19.1.0",
-    "eslint": "^8.19.0",
-    "jest": "^29.6.3",
-    "prettier": "2.8.8",
-    "react-test-renderer": "19.1.1",
-    "typescript": "^5.8.3"
+    "@expo/config-plugins": "^54.0.2",
+    "@react-native-community/eslint-config": "^3.2.0",
+    "@types/react": "^18.2.44",
+    "@types/react-native": "^0.72.8",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "react": "18.2.0",
+    "react-native": "0.73.2",
+    "react-native-builder-bob": "^0.23.2",
+    "release-it": "^17.0.1",
+    "typescript": "^5.3.3"
   },
-  "engines": {
-    "node": ">=20"
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      "commonjs",
+      "module",
+      "typescript"
+    ]
   }
 }

@@ -1,97 +1,568 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# react-native-serial-transport
 
-# Getting Started
+USB Serial Port communication for React Native with ESP32/ESP8266 flashing support.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Features
 
-## Step 1: Start Metro
+- ✅ USB Serial communication on Android
+- ✅ Support for common USB-to-serial chips (CP210x, CH340, FTDI, PL2303)
+- ✅ DTR/RTS control for ESP32 bootloader mode
+- ✅ Compatible with esptool-js Transport interface
+- ✅ Expo config plugin for easy setup
+- ✅ TypeScript support
+- ⚠️ Android only (iOS does not support USB serial natively)
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Installation
 
-To start the Metro dev server, run the following command from the root of your React Native project:
-
-```sh
-# Using npm
-npm start
-
-# OR using Yarn
-yarn start
+```bash
+npm install react-native-serial-transport
+# or
+yarn add react-native-serial-transport
 ```
 
-## Step 2: Build and run your app
+## Setup
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+Choose your setup method based on your project type:
 
-### Android
+### Option 1: Expo Projects (Recommended) 🚀
 
-```sh
-# Using npm
-npm run android
+If you're using Expo (SDK 48+), setup is automatic!
 
-# OR using Yarn
-yarn android
+#### 1. Add to app.json or app.config.js
+
+```json
+{
+  "expo": {
+    "name": "My App",
+    "plugins": [
+      "react-native-serial-transport"
+    ]
+  }
+}
 ```
 
-### iOS
+#### 2. Rebuild your app
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+```bash
+# For development builds
+npx expo prebuild --clean
+npx expo run:android
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+# For production builds with EAS
+eas build --platform android
 ```
 
-Then, and every time you update your native dependencies, run:
+That's it! The plugin automatically:
+- ✅ Adds USB permissions to AndroidManifest.xml
+- ✅ Creates device_filter.xml with common ESP chip vendors
+- ✅ Configures USB intent filters
+- ✅ Sets up meta-data for USB device attachment
 
-```sh
-bundle exec pod install
+#### Custom Vendor IDs (Optional)
+
+If you need to support additional USB vendor IDs:
+
+```json
+{
+  "expo": {
+    "plugins": [
+      [
+        "react-native-serial-transport",
+        {
+          "vendorIds": [4292, 6790, 1027, 1659, 5840]
+        }
+      ]
+    ]
+  }
+}
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+Common vendor IDs:
+- `4292` (0x10C4) - Silicon Labs CP210x (ESP32, ESP8266)
+- `6790` (0x1A86) - QinHeng CH340/CH341
+- `1027` (0x0403) - FTDI chips
+- `1659` (0x067B) - Prolific PL2303
+- `5840` (0x16D0) - MCS (some ESP boards)
 
-```sh
-# Using npm
-npm run ios
+---
 
-# OR using Yarn
-yarn ios
+### Option 2: React Native CLI / Bare Workflow 📱
+
+For bare React Native projects or Expo projects with custom native code:
+
+#### Step 1: Link the Package
+
+For React Native 0.60+, auto-linking handles this automatically. No manual linking needed!
+
+```bash
+# Just install and rebuild
+yarn add react-native-serial-transport
+cd android && ./gradlew clean
+cd .. && npx react-native run-android
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+#### Step 2: Configure Android Permissions
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+Add to `android/app/src/main/AndroidManifest.xml`:
 
-## Step 3: Modify your app
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- USB Permissions -->
+    <uses-permission android:name="android.permission.USB_PERMISSION" />
+    
+    <!-- USB Feature (not required but recommended) -->
+    <uses-feature 
+        android:name="android.hardware.usb.host" 
+        android:required="false" />
 
-Now that you have successfully run the app, let's make changes!
+    <application>
+        <activity 
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize">
+            
+            <!-- Main intent filter (already exists) -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            
+            <!-- ADD THIS: USB device attached intent filter -->
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+            
+            <!-- ADD THIS: Reference to device filter -->
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/device_filter" />
+        </activity>
+    </application>
+</manifest>
+```
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+#### Step 3: Create USB Device Filter
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+Create `android/app/src/main/res/xml/device_filter.xml`:
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- CP210x Silicon Labs (ESP32, ESP8266) -->
+    <usb-device vendor-id="4292" />
+    
+    <!-- CH340/CH341 USB to Serial -->
+    <usb-device vendor-id="6790" />
+    
+    <!-- FTDI chips -->
+    <usb-device vendor-id="1027" />
+    
+    <!-- Prolific PL2303 -->
+    <usb-device vendor-id="1659" />
+    
+    <!-- Optional: Specific product IDs -->
+    <!-- <usb-device vendor-id="4292" product-id="60000" /> -->
+</resources>
+```
 
-## Congratulations! :tada:
+**Note:** You may need to create the `xml` directory if it doesn't exist:
 
-You've successfully run and modified your React Native App. :partying_face:
+```bash
+mkdir -p android/app/src/main/res/xml
+```
 
-### Now what?
+#### Step 4: Rebuild Your App
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+```bash
+cd android && ./gradlew clean
+cd .. && npx react-native run-android
+```
 
-# Troubleshooting
+---
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+### Option 3: Expo with Custom Native Code
 
-# Learn More
+If you've already ejected from Expo or are using a bare workflow:
 
-To learn more about React Native, take a look at the following resources:
+1. Follow **Option 2** steps above
+2. Or use the config plugin in `app.config.js` (even in bare projects)
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+---
+
+## Usage
+
+### Basic Example
+
+```typescript
+import { SerialTransport } from 'react-native-serial-transport';
+
+async function connectToESP() {
+  const transport = new SerialTransport();
+
+  try {
+    // List available USB devices
+    const devices = await transport.listDevices();
+    console.log('Available devices:', devices);
+
+    // Connect to device (auto-selects ESP device)
+    await transport.connect(115200);
+    console.log('Connected!');
+
+    // Write data
+    const data = new Uint8Array([0x01, 0x02, 0x03]);
+    await transport.write(data);
+
+    // Read data with timeout
+    const received = await transport.rawRead(1000);
+    console.log('Received:', received);
+
+    // Control DTR/RTS for ESP32 reset
+    await transport.setDTR(false);
+    await transport.setRTS(true);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    await transport.setDTR(true);
+    await transport.setRTS(false);
+
+    // Disconnect
+    await transport.disconnect();
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+```
+
+### List Available Devices
+
+```typescript
+import NativeSerialPort from 'react-native-serial-transport';
+
+const devices = await NativeSerialPort.listDevices();
+
+devices.forEach(device => {
+  console.log(`Device: ${device.product}`);
+  console.log(`Vendor ID: 0x${device.vendorId.toString(16)}`);
+  console.log(`Product ID: 0x${device.productId.toString(16)}`);
+  console.log(`Serial Number: ${device.serialNumber}`);
+});
+```
+
+### Connect to Specific Device
+
+```typescript
+import { SerialTransport } from 'react-native-serial-transport';
+
+const transport = new SerialTransport();
+
+// Connect to specific device by name
+await transport.connect(115200, '/dev/bus/usb/001/002');
+
+// Or let it auto-select ESP device
+await transport.connect(115200);
+```
+
+### Using with ESPTool-js
+
+This library is designed to be compatible with [esptool-js](https://github.com/espressif/esptool-js):
+
+```typescript
+import { ESPLoader } from 'esptool-js';
+import { SerialTransport } from 'react-native-serial-transport';
+
+async function flashESP32() {
+  // Create transport
+  const transport = new SerialTransport();
+  await transport.connect(115200);
+
+  // Create ESPLoader with custom transport
+  const loader = new ESPLoader({
+    transport: transport,
+    baudrate: 115200,
+    terminal: {
+      clean: () => {},
+      writeLine: (text: string) => console.log(text),
+      write: (text: string) => console.log(text)
+    }
+  });
+
+  try {
+    // Connect and detect chip
+    await loader.connect();
+    console.log(`Connected to ${loader.chip.CHIP_NAME}`);
+
+    // Flash firmware
+    await loader.writeFlash({
+      fileArray: [{
+        data: firmwareData,
+        address: 0x1000
+      }],
+      flashSize: 'keep',
+      flashMode: 'dio',
+      flashFreq: '40m',
+      eraseAll: false,
+      compress: true,
+      reportProgress: (fileIndex, written, total) => {
+        console.log(`Progress: ${written}/${total}`);
+      }
+    });
+
+    console.log('Flash complete!');
+  } finally {
+    await loader.disconnect();
+    await transport.disconnect();
+  }
+}
+```
+
+### Listen to USB Events
+
+```typescript
+import { NativeEventEmitter, NativeModules } from 'react-native';
+
+const { RNSerialPort } = NativeModules;
+const eventEmitter = new NativeEventEmitter(RNSerialPort);
+
+// USB device attached
+const attachListener = eventEmitter.addListener('onUsbAttached', () => {
+  console.log('USB device attached');
+});
+
+// USB device detached
+const detachListener = eventEmitter.addListener('onUsbDetached', () => {
+  console.log('USB device detached');
+});
+
+// Data received (if using streaming mode)
+const dataListener = eventEmitter.addListener('onDataReceived', (event) => {
+  console.log('Data received:', event.data);
+});
+
+// Cleanup
+attachListener.remove();
+detachListener.remove();
+dataListener.remove();
+```
+
+## API Reference
+
+### SerialTransport
+
+#### Methods
+
+##### `listDevices(): Promise<USBDevice[]>`
+
+Returns a list of connected USB serial devices.
+
+```typescript
+const devices = await transport.listDevices();
+```
+
+##### `connect(baudrate: number, deviceName?: string): Promise<string>`
+
+Connects to a USB serial device.
+
+- `baudrate`: Baud rate (e.g., 115200, 921600)
+- `deviceName`: Optional device path. If omitted, auto-selects ESP device.
+
+```typescript
+await transport.connect(115200);
+```
+
+##### `write(data: Uint8Array): Promise<void>`
+
+Writes data to the serial port.
+
+```typescript
+const data = new Uint8Array([0x01, 0x02, 0x03]);
+await transport.write(data);
+```
+
+##### `read(timeout: number): AsyncGenerator<Uint8Array>`
+
+Reads data from the serial port (generator function).
+
+```typescript
+for await (const data of transport.read(3000)) {
+  console.log('Received:', data);
+}
+```
+
+##### `rawRead(timeout: number): Promise<Uint8Array>`
+
+Reads data from the serial port (promise-based).
+
+```typescript
+const data = await transport.rawRead(1000);
+```
+
+##### `setRTS(state: boolean): Promise<void>`
+
+Sets the RTS (Request To Send) control line.
+
+```typescript
+await transport.setRTS(true);
+```
+
+##### `setDTR(state: boolean): Promise<void>`
+
+Sets the DTR (Data Terminal Ready) control line.
+
+```typescript
+await transport.setDTR(false);
+```
+
+##### `setRtsDtr(rts: boolean, dtr: boolean): Promise<void>`
+
+Sets both RTS and DTR control lines simultaneously.
+
+```typescript
+await transport.setRtsDtr(false, true);
+```
+
+##### `setBaudrate(baudrate: number): Promise<void>`
+
+Changes the baud rate of an open connection.
+
+```typescript
+await transport.setBaudrate(921600);
+```
+
+##### `disconnect(): Promise<void>`
+
+Closes the serial port connection.
+
+```typescript
+await transport.disconnect();
+```
+
+### NativeSerialPort (Low-level API)
+
+For advanced use cases, you can use the native module directly:
+
+```typescript
+import NativeSerialPort from 'react-native-serial-transport';
+
+// List devices
+const devices = await NativeSerialPort.listDevices();
+
+// Connect
+await NativeSerialPort.connect('/dev/bus/usb/001/002', 115200);
+
+// Write (accepts number array)
+await NativeSerialPort.write([0x01, 0x02, 0x03]);
+
+// Read (returns number array)
+const data: number[] = await NativeSerialPort.read(1000);
+
+// Control lines
+await NativeSerialPort.setRTS(true);
+await NativeSerialPort.setDTR(false);
+
+// Disconnect
+await NativeSerialPort.disconnect();
+```
+
+## Troubleshooting
+
+### No USB devices found
+
+1. **Check USB cable**: Ensure your USB cable supports data transfer (not charge-only)
+2. **Check device connection**: Verify the device is properly connected via USB OTG (if using a phone)
+3. **Check permissions**: Android may prompt for USB permission on first connection
+4. **Check device filter**: Ensure your device's vendor ID is in `device_filter.xml`
+
+### Permission denied errors
+
+The app will automatically request USB permissions when connecting. If you see permission errors:
+
+1. Check that `android.permission.USB_PERMISSION` is in your AndroidManifest.xml
+2. Try unplugging and replugging the USB device
+3. Check if your device appears in `adb shell ls /dev/bus/usb/`
+
+### Device not auto-detected
+
+If your ESP device isn't auto-detected, you can specify it manually:
+
+```typescript
+// List all devices first
+const devices = await transport.listDevices();
+console.log(devices);
+
+// Connect to specific device
+await transport.connect(115200, devices[0].deviceName);
+```
+
+### Auto-linking not working
+
+For React Native < 0.60, you need to manually link:
+
+```bash
+react-native link react-native-serial-transport
+```
+
+Then follow the manual setup steps in **Option 2**.
+
+### Build errors after installation
+
+1. Clean build:
+   ```bash
+   cd android && ./gradlew clean
+   cd .. && npx react-native run-android
+   ```
+
+2. Clear Metro cache:
+   ```bash
+   npx react-native start --reset-cache
+   ```
+
+3. Reinstall dependencies:
+   ```bash
+   rm -rf node_modules
+   yarn install
+   cd android && ./gradlew clean
+   cd .. && npx react-native run-android
+   ```
+
+## Supported USB-to-Serial Chips
+
+| Chip Family | Vendor ID | Common On | Notes |
+|-------------|-----------|-----------|-------|
+| CP210x | 0x10C4 (4292) | ESP32, ESP8266, NodeMCU | Silicon Labs |
+| CH340/CH341 | 0x1A86 (6790) | Many ESP boards, Arduino clones | QinHeng Electronics |
+| FTDI | 0x0403 (1027) | Arduino, various dev boards | Future Technology Devices |
+| PL2303 | 0x067B (1659) | Older USB-serial adapters | Prolific |
+
+## iOS Support
+
+⚠️ **iOS does not support USB serial communication** through standard APIs. For iOS:
+
+- Use **Bluetooth Low Energy (BLE)** for wireless communication
+- Use **WiFi-based** flashing (ESP32 in AP mode)
+- Require users to flash via desktop/Android first, then use OTA updates
+
+Consider using [`react-native-ble-plx`](https://github.com/dotintent/react-native-ble-plx) for cross-platform wireless communication.
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
+
+## License
+
+MIT
+
+## Credits
+
+- Built with [usb-serial-for-android](https://github.com/mik3y/usb-serial-for-android)
+- Compatible with [esptool-js](https://github.com/espressif/esptool-js)
+
+## Support
+
+- 📫 Issues: [GitHub Issues](https://github.com/react-native-serial-transport/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/react-native-serial-transport/discussions)
+- 📖 Documentation: [GitHub Wiki](https://github.com/react-native-serial-transport/wiki)
+
+---
+
+Made with ❤️ for the React Native and ESP32 communities

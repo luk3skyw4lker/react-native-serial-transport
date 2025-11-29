@@ -73,3 +73,17 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# Build outputs
+lib/
+plugin/build/
+
+# Node
+node_modules/
+
+# Android
+android/build/
+android/.gradle/
+
+# iOS
+ios/build/

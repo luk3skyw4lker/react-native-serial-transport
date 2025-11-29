@@ -1,0 +1,15 @@
+# Source files (only ship compiled)
+plugin/src/
+plugin/tsconfig.json
+
+# Keep compiled plugin
+!plugin/build/
+
+# Tests
+**/__tests__/
+**/__fixtures__/
+**/__mocks__/
+
+# Development
+example/
+.github/
