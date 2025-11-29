@@ -11,6 +11,7 @@
     "src",
     "lib",
     "android",
+    "ios",
     "@types",
     "plugin/build",
     "!**/__tests__",
@@ -18,7 +19,8 @@
     "!**/__mocks__",
     "!android/build",
     "!android/.gradle",
-    "!android/.idea"
+    "!android/.idea",
+    "!ios/build"
   ],
   "scripts": {
     "typescript": "tsc --noEmit",
