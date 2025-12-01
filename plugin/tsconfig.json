@@ -1,16 +1,17 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "outDir": "./build",
+    "outDir": "..",
     "rootDir": "..",
     "module": "commonjs",
     "target": "es2019",
     "lib": ["es2019"],
-    "declaration": true,
+    "declaration": false,
+    "declarationMap": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "noEmit": false
   },
-  "include": ["*.ts", "../app.plugin.ts"],
+  "include": ["../app.plugin.ts", "*.ts"],
   "exclude": ["**/__tests__", "**/__fixtures__", "build"]
 }

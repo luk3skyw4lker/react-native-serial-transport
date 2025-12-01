@@ -77,6 +77,13 @@ yarn-error.log
 # Build outputs
 lib/
 plugin/build/
+plugin/**/*.js
+plugin/**/*.js.map
+plugin/**/*.d.ts
+plugin/**/*.d.ts.map
+app.plugin.js
+app.plugin.d.ts
+app.plugin.d.ts.map
 
 # Node
 node_modules/
