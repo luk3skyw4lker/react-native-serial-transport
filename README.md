@@ -12,6 +12,10 @@ USB Serial Port communication for React Native with ESP32/ESP8266 flashing suppo
 - ✅ TypeScript support
 - ⚠️ Android only (iOS does not support USB serial natively)
 
+## Examples
+
+- [Example App](https://github.com/luk3skyw4lker/react-native-serial-transport-test-app)
+
 ## Installation
 
 ```bash
