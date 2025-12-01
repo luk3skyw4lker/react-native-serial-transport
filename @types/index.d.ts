@@ -1,4 +1,4 @@
-declare module 'react-native-native-serial-port' {
+declare module 'react-native-serial-transport' {
 	import { EmitterSubscription } from 'react-native';
 
 	/**
