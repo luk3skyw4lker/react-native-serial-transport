@@ -208,8 +208,8 @@ async function connectToESP() {
     console.log('Available devices:', devices);
 
     // Connect to device (auto-selects ESP device)
-    await transport.connect(115200);
-    console.log('Connected!');
+    const result = await transport.connect(undefined, 115200);
+    console.log(result); // 'Connected to <device> at 115200 band'
 
     // Write data
     const data = new Uint8Array([0x01, 0x02, 0x03]);
@@ -242,7 +242,7 @@ import NativeSerialPort from 'react-native-serial-transport';
 const devices = await NativeSerialPort.listDevices();
 
 devices.forEach(device => {
-  console.log(`Device: ${device.product}`);
+  console.log(`Device: ${device.productName}`);
   console.log(`Vendor ID: 0x${device.vendorId.toString(16)}`);
   console.log(`Product ID: 0x${device.productId.toString(16)}`);
   console.log(`Serial Number: ${device.serialNumber}`);
@@ -257,10 +257,10 @@ import { SerialTransport } from 'react-native-serial-transport';
 const transport = new SerialTransport();
 
 // Connect to specific device by name
-await transport.connect(115200, '/dev/bus/usb/001/002');
+await transport.connect('/dev/bus/usb/001/002', 115200);
 
 // Or let it auto-select ESP device
-await transport.connect(115200);
+await transport.connect(undefined, 115200);
 ```
 
 ### Using with ESPTool-js
@@ -274,7 +274,7 @@ import { SerialTransport } from 'react-native-serial-transport';
 async function flashESP32() {
   // Create transport
   const transport = new SerialTransport();
-  await transport.connect(115200);
+  await transport.connect(undefined, 115200);
 
   // Create ESPLoader with custom transport
   const loader = new ESPLoader({
@@ -359,24 +359,25 @@ Returns a list of connected USB serial devices.
 const devices = await transport.listDevices();
 ```
 
-##### `connect(baudrate: number, deviceName?: string): Promise<string>`
+##### `connect(deviceName?: string, baudRate?: number): Promise<string>`
 
 Connects to a USB serial device.
 
-- `baudrate`: Baud rate (e.g., 115200, 921600)
 - `deviceName`: Optional device path. If omitted, auto-selects ESP device.
+- `baudRate`: Baud rate (default: 115200)
 
 ```typescript
-await transport.connect(115200);
+await transport.connect(undefined, 115200);
 ```
 
-##### `write(data: Uint8Array): Promise<void>`
+##### `write(data: Uint8Array): Promise<number>`
 
-Writes data to the serial port.
+Writes data to the serial port. Returns the number of bytes written.
 
 ```typescript
 const data = new Uint8Array([0x01, 0x02, 0x03]);
-await transport.write(data);
+const bytesWritten = await transport.write(data);
+console.log(`Wrote ${bytesWritten} bytes`);
 ```
 
 ##### `read(timeout: number): AsyncGenerator<Uint8Array>`
@@ -413,25 +414,17 @@ Sets the DTR (Data Terminal Ready) control line.
 await transport.setDTR(false);
 ```
 
-##### `setRtsDtr(rts: boolean, dtr: boolean): Promise<void>`
-
-Sets both RTS and DTR control lines simultaneously.
-
-```typescript
-await transport.setRtsDtr(false, true);
-```
-
-##### `setBaudrate(baudrate: number): Promise<void>`
+##### `setBaudRate(baudRate: number): Promise<boolean>`
 
 Changes the baud rate of an open connection.
 
 ```typescript
-await transport.setBaudrate(921600);
+await transport.setBaudRate(921600);
 ```
 
-##### `disconnect(): Promise<void>`
+##### `disconnect(): Promise<boolean>`
 
-Closes the serial port connection.
+Closes the serial port connection. Returns true if successful.
 
 ```typescript
 await transport.disconnect();
@@ -491,7 +484,7 @@ const devices = await transport.listDevices();
 console.log(devices);
 
 // Connect to specific device
-await transport.connect(115200, devices[0].deviceName);
+await transport.connect(devices[0].deviceName, 115200);
 ```
 
 ### Auto-linking not working
