@@ -43,13 +43,13 @@
     "flash",
     "uart"
   ],
-  "repository": "https://github.com/yourorg/react-native-serialport",
-  "author": "Your Name <your@email.com>",
+  "repository": "https://github.com/luk3skyw4lker/react-native-serialport",
+  "author": "Lucas Lemos <lucashenriqueblemos@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/yourorg/react-native-serialport/issues"
+    "url": "https://github.com/luk3skyw4lker/react-native-serialport/issues"
   },
-  "homepage": "https://github.com/yourorg/react-native-serialport#readme",
+  "homepage": "https://github.com/luk3skyw4lker/react-native-serialport#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
