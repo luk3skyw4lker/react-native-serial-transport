@@ -9,6 +9,10 @@ export class SerialTransport {
 		return NativeSerialPort.listDevices();
 	}
 
+	async requestPermission(device: USBDevice): Promise<void> {
+		return NativeSerialPort.requestPermission(device);
+	}
+
 	async connect(
 		deviceName?: string,
 		baudRate: number = 115200

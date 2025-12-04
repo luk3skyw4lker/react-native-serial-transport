@@ -43,6 +43,10 @@ class SerialPortModule {
     return RNSerialPort.listDevices();
   }
 
+  requestPermission(device: USBDevice): Promise<void> {
+    return RNSerialPort.requestPermission(device);
+  }
+
   connect(
     deviceName?: string,
     baudRate: number = 115200,

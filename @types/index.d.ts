@@ -50,6 +50,13 @@ declare module 'react-native-serial-transport' {
 		listDevices(): Promise<USBDevice[]>;
 
 		/**
+		 * Requests permission to access the USB device
+		 * @param device - The device you want to access
+		 * @returns void return
+		 */
+		requestPermission(device: USBDevice): Promise<void>;
+
+		/**
 		 * Connect to a serial device
 		 * @param deviceName - Optional device name to connect to (first available if not specified)
 		 * @param baudRate - Baud rate for the connection (default: 115200)
