@@ -178,7 +178,7 @@ class SerialPortModule(reactContext: ReactApplicationContext) :
         permissionPromise = promise
         
         val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            PendingIntent.FLAG_MUTABLE
+            PendingIntent.FLAG_IMMUTABLE
         } else {
             0
         }
