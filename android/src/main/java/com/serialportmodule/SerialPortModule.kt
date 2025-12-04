@@ -112,22 +112,17 @@ class SerialPortModule(reactContext: ReactApplicationContext) :
             val devices = Arguments.createArray()
 
             for (device in deviceList.values) {
-                val driver = UsbSerialProber.getDefaultProber().probeDevice(device)
-                
-                if (driver != null) {
-                    val deviceInfo = Arguments.createMap().apply {
-                        putString("deviceName", device.deviceName)
-                        putInt("vendorId", device.vendorId)
-                        putInt("productId", device.productId)
-                        putString("manufacturer", device.manufacturerName ?: "Unknown")
-                        putString("product", device.productName ?: "Unknown")
-                        putString("serialNumber", device.serialNumber ?: "")
-                        putInt("deviceClass", device.deviceClass)
-                        putInt("deviceSubclass", device.deviceSubclass)
-                        putInt("portCount", driver.ports.size)
-                    }
-                    devices.pushMap(deviceInfo)
+                val deviceInfo = Arguments.createMap().apply {
+                    putString("deviceName", device.deviceName)
+                    putInt("vendorId", device.vendorId)
+                    putInt("productId", device.productId)
+                    putString("manufacturer", device.manufacturerName ?: "Unknown")
+                    putString("product", device.productName ?: "Unknown")
+                    putString("serialNumber", device.serialNumber ?: "")
+                    putInt("deviceClass", device.deviceClass)
+                    putInt("deviceSubclass", device.deviceSubclass)
                 }
+                devices.pushMap(deviceInfo)
             }
 
             promise.resolve(devices)
