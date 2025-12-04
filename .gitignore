@@ -94,3 +94,6 @@ android/.gradle/
 
 # iOS
 ios/build/
+
+# Editor config files
+.vscode/
