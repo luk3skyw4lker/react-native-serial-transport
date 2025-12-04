@@ -112,6 +112,8 @@ class SerialPortModule(reactContext: ReactApplicationContext) :
             val devices = Arguments.createArray()
 
             for (device in deviceList.values) {
+                requestPermission(device, promise)
+
                 val deviceInfo = Arguments.createMap().apply {
                     putString("deviceName", device.deviceName)
                     putInt("vendorId", device.vendorId)
