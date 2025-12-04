@@ -1,6 +1,6 @@
 {
   "name": "react-native-serial-transport",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "USB Serial Port support for React Native for Android",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
