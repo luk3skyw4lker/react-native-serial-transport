@@ -1,4 +1,4 @@
-declare module 'react-native-native-serial-port' {
+declare module 'react-native-serial-transport' {
 	import { EmitterSubscription } from 'react-native';
 
 	/**
@@ -48,6 +48,13 @@ declare module 'react-native-native-serial-port' {
 		 * @returns Promise resolving to an array of USB devices
 		 */
 		listDevices(): Promise<USBDevice[]>;
+
+		/**
+		 * Requests permission to access the USB device
+		 * @param device - The device you want to access
+		 * @returns void return
+		 */
+		requestPermission(device: USBDevice): Promise<void>;
 
 		/**
 		 * Connect to a serial device
@@ -131,6 +138,13 @@ declare module 'react-native-native-serial-port' {
 		 * @returns Promise resolving to an array of USB devices
 		 */
 		listDevices(): Promise<USBDevice[]>;
+
+		/**
+		 * Request permission to access a USB device
+		 * @param device - the USB device you want to access
+		 * @returns Promise resolving to an array of USB devices
+		 */
+		requestPermission(device: USBDevice): Promise<void>;
 
 		/**
 		 * Connect to a serial device

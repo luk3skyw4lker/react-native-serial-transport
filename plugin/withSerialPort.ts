@@ -7,6 +7,10 @@ import {
 import * as fs from 'fs';
 import * as path from 'path';
 
+interface Options {
+	vendorIds?: number[];
+}
+
 /**
  * Add USB permissions and intent filters to AndroidManifest.xml
  */
@@ -102,10 +106,18 @@ const withSerialPortManifest: ConfigPlugin = config => {
 	});
 };
 
+const formatCustomVendorIds = (vendorIds: number[]): string => {
+	return vendorIds
+		.map(vendorId => {
+			return `    <usb-device vendor-id="${vendorId}" />`;
+		})
+		.join('\n\n');
+};
+
 /**
  * Create device_filter.xml in the Android res/xml directory
  */
-const withSerialPortDeviceFilter: ConfigPlugin = config => {
+const withSerialPortDeviceFilter: ConfigPlugin<Options> = (config, options) => {
 	return withDangerousMod(config, [
 		'android',
 		async config => {
@@ -144,6 +156,7 @@ const withSerialPortDeviceFilter: ConfigPlugin = config => {
     
     <!-- WCH CH9102 -->
     <usb-device vendor-id="6790" product-id="29987" />
+    ${options.vendorIds ? `\n${formatCustomVendorIds(options.vendorIds)}` : ''}
 </resources>
 `;
 
@@ -157,9 +170,9 @@ const withSerialPortDeviceFilter: ConfigPlugin = config => {
 /**
  * Main config plugin
  */
-const withSerialPort: ConfigPlugin = config => {
+const withSerialPort: ConfigPlugin<Options> = (config, options) => {
 	config = withSerialPortManifest(config);
-	config = withSerialPortDeviceFilter(config);
+	config = withSerialPortDeviceFilter(config, options);
 	return config;
 };
 

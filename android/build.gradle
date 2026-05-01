@@ -21,7 +21,7 @@ def safeExtGet(prop, fallback) {
 
 android {
     compileSdkVersion safeExtGet('compileSdkVersion', 34)
-    namespace "com.yourorg.serialport"
+    namespace "com.serialportmodule"
 
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', 21)

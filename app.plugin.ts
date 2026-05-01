@@ -1,3 +1,3 @@
-import withSerialPort from './plugin/withSerialPort';
+import withSerialPort from './plugin/build/withSerialPort';
 
 export default withSerialPort;
